@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Preguntas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .question {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            text-align: left;
+        }
+
+        .option:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .option.correct {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .option.incorrect {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .score-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .score {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .feedback {
+            font-size: 1.2em;
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .feedback.excellent {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .feedback.good {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .feedback.poor {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🧠 Juego de Preguntas</h1>
+        
+        <div id="game-area">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            
+            <div class="question-container">
+                <div class="question-number" id="question-number">Pregunta 1 de 4</div>
+                <div class="question" id="question-text"></div>
+            </div>
+            
+            <div class="options" id="options-container"></div>
+            
+            <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>Siguiente Pregunta</button>
+        </div>
+
+        <div id="results-area" class="hidden">
+            <div class="score-container">
+                <div class="score" id="final-score"></div>
+                <div class="feedback" id="feedback"></div>
+            </div>
+            <button class="btn" onclick="restartGame()">Jugar de Nuevo</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Cuál es la capital de Francia?",
+                options: ["Londres", "Madrid", "París", "Roma"],
+                correct: 2
+            },
+            {
+                question: "¿En qué año llegó el hombre a la Luna?",
+                options: ["1967", "1969", "1971", "1973"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el planeta más grande del sistema solar?",
+                options: ["Saturno", "Júpiter", "Neptuno", "Urano"],
+                correct: 1
+            },
+            {
+                question: "¿Quién escribió 'Don Quijote de la Mancha'?",
+                options: ["García Lorca", "Miguel de Cervantes", "Lope de Vega", "Calderón de la Barca"],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = null;
+
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            
+            // Actualizar número de pregunta
+            document.getElementById('question-number').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            
+            // Actualizar barra de progreso
+            const progress = ((currentQuestion) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            
+            // Mostrar pregunta
+            document.getElementById('question-text').textContent = question.question;
+            
+            // Crear opciones
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+                optionElement.onclick = () => selectOption(index, optionElement);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Resetear botón
+            document.getElementById('next-btn').disabled = true;
+            selectedAnswer = null;
+        }
+
+        function selectOption(index, element) {
+            // Remover selección anterior
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Seleccionar nueva opción
+            element.classList.add('selected');
+            selectedAnswer = index;
+            
+            // Habilitar botón siguiente
+            document.getElementById('next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            if (selectedAnswer === null) return;
+            
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            // Mostrar respuesta correcta e incorrecta
+            options.forEach((option, index) => {
+                option.onclick = null; // Deshabilitar clicks
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedAnswer && index !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // Verificar respuesta
+            if (selectedAnswer === question.correct) {
+                score++;
+            }
+            
+            // Esperar un momento para mostrar la respuesta
+            setTimeout(() => {
+                currentQuestion++;
+                
+                if (currentQuestion < questions.length) {
+                    loadQuestion();
+                } else {
+                    showResults();
+                }
+            }, 2000);
+            
+            // Deshabilitar botón mientras se muestra la respuesta
+            document.getElementById('next-btn').disabled = true;
+        }
+
+        function showResults() {
+            // Ocultar área del juego
+            document.getElementById('game-area').classList.add('hidden');
+            
+            // Mostrar resultados
+            document.getElementById('results-area').classList.remove('hidden');
+            
+            // Completar barra de progreso
+            document.getElementById('progress').style.width = '100%';
+            
+            // Mostrar puntuación
+            const percentage = (score / questions.length) * 100;
+            document.getElementById('final-score').textContent = 
+                `Puntuación: ${score} de ${questions.length} (${percentage.toFixed(0)}%)`;
+            
+            // Mostrar feedback
+            const feedbackElement = document.getElementById('feedback');
+            if (score === questions.length) {
+                feedbackElement.textContent = "¡Excelente! ¡Respuesta perfecta! 🏆";
+                feedbackElement.className = "feedback excellent";
+            } else if (score >= questions.length * 0.7) {
+                feedbackElement.textContent = "¡Muy bien! Buen trabajo 👏";
+                feedbackElement.className = "feedback good";
+            } else {
+                feedbackElement.textContent = "Puedes mejorar. ¡Inténtalo de nuevo! 💪";
+                feedbackElement.className = "feedback poor";
+            }
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            selectedAnswer = null;
+            
+            // Mostrar área del juego
+            document.getElementById('game-area').classList.remove('hidden');
+            document.getElementById('results-area').classList.add('hidden');
+            
+            // Cargar primera pregunta
+            loadQuestion();
+        }
+
+        // Inicializar juego
+        loadQuestion();
+    </script>
+</body>
+</html>
