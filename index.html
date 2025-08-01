@@ -179,11 +179,53 @@
             width: 0%;
             transition: width 0.3s ease;
         }
+
+        .language-selector {
+            text-align: right;
+            margin-bottom: 20px;
+            padding: 10px 0;
+        }
+
+        .language-selector label {
+            margin-right: 10px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .language-selector select {
+            padding: 8px 15px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            background: white;
+            color: #333;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .language-selector select:hover {
+            background: #f8f9fa;
+            transform: translateY(-1px);
+        }
+
+        .language-selector select:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <h1>🧠 Juego de Preguntas</h1>
+        <div class="language-selector">
+            <label for="language-select" id="language-label">Seleccionar Idioma:</label>
+            <select id="language-select" onchange="changeLanguage()">
+                <option value="es">Español</option>
+                <option value="en">English</option>
+                <option value="pt">Português</option>
+            </select>
+        </div>
+        
+        <h1 id="game-title">🧠 Juego de Preguntas</h1>
         
         <div id="game-area">
             <div class="progress-bar">
@@ -205,46 +247,157 @@
                 <div class="score" id="final-score"></div>
                 <div class="feedback" id="feedback"></div>
             </div>
-            <button class="btn" onclick="restartGame()">Jugar de Nuevo</button>
+            <button class="btn" id="play-again-btn" onclick="restartGame()">Jugar de Nuevo</button>
         </div>
     </div>
 
     <script>
-        const questions = [
-            {
-                question: "¿Cuál es la capital de Francia?",
-                options: ["Londres", "Madrid", "París", "Roma"],
-                correct: 2
+        // Sistema multiidioma
+        const translations = {
+            es: {
+                title: "🧠 Juego de Preguntas",
+                questionOf: "Pregunta {current} de {total}",
+                nextButton: "Siguiente Pregunta",
+                playAgain: "Jugar de Nuevo",
+                score: "Puntuación: {score} de {total} ({percentage}%)",
+                excellent: "¡Excelente! ¡Respuesta perfecta! 🏆",
+                good: "¡Muy bien! Buen trabajo 👏",
+                poor: "Puedes mejorar. ¡Inténtalo de nuevo! 💪",
+                selectLanguage: "Seleccionar Idioma:",
+                questions: [
+                    {
+                        question: "¿Cuál es la capital de Francia?",
+                        options: ["Londres", "Madrid", "París", "Roma"],
+                        correct: 2
+                    },
+                    {
+                        question: "¿En qué año llegó el hombre a la Luna?",
+                        options: ["1967", "1969", "1971", "1973"],
+                        correct: 1
+                    },
+                    {
+                        question: "¿Cuál es el planeta más grande del sistema solar?",
+                        options: ["Saturno", "Júpiter", "Neptuno", "Urano"],
+                        correct: 1
+                    },
+                    {
+                        question: "¿Quién escribió 'Don Quijote de la Mancha'?",
+                        options: ["García Lorca", "Miguel de Cervantes", "Lope de Vega", "Calderón de la Barca"],
+                        correct: 1
+                    }
+                ]
             },
-            {
-                question: "¿En qué año llegó el hombre a la Luna?",
-                options: ["1967", "1969", "1971", "1973"],
-                correct: 1
+            en: {
+                title: "🧠 Quiz Game",
+                questionOf: "Question {current} of {total}",
+                nextButton: "Next Question",
+                playAgain: "Play Again",
+                score: "Score: {score} of {total} ({percentage}%)",
+                excellent: "Excellent! Perfect score! 🏆",
+                good: "Very good! Great job 👏",
+                poor: "You can improve. Try again! 💪",
+                selectLanguage: "Select Language:",
+                questions: [
+                    {
+                        question: "What is the capital of France?",
+                        options: ["London", "Madrid", "Paris", "Rome"],
+                        correct: 2
+                    },
+                    {
+                        question: "In what year did man land on the Moon?",
+                        options: ["1967", "1969", "1971", "1973"],
+                        correct: 1
+                    },
+                    {
+                        question: "What is the largest planet in the solar system?",
+                        options: ["Saturn", "Jupiter", "Neptune", "Uranus"],
+                        correct: 1
+                    },
+                    {
+                        question: "Who wrote 'Don Quixote'?",
+                        options: ["García Lorca", "Miguel de Cervantes", "Lope de Vega", "Calderón de la Barca"],
+                        correct: 1
+                    }
+                ]
             },
-            {
-                question: "¿Cuál es el planeta más grande del sistema solar?",
-                options: ["Saturno", "Júpiter", "Neptuno", "Urano"],
-                correct: 1
-            },
-            {
-                question: "¿Quién escribió 'Don Quijote de la Mancha'?",
-                options: ["García Lorca", "Miguel de Cervantes", "Lope de Vega", "Calderón de la Barca"],
-                correct: 1
+            pt: {
+                title: "🧠 Jogo de Perguntas",
+                questionOf: "Pergunta {current} de {total}",
+                nextButton: "Próxima Pergunta",
+                playAgain: "Jogar Novamente",
+                score: "Pontuação: {score} de {total} ({percentage}%)",
+                excellent: "Excelente! Pontuação perfeita! 🏆",
+                good: "Muito bem! Ótimo trabalho 👏",
+                poor: "Você pode melhorar. Tente novamente! 💪",
+                selectLanguage: "Selecionar Idioma:",
+                questions: [
+                    {
+                        question: "Qual é a capital da França?",
+                        options: ["Londres", "Madrid", "Paris", "Roma"],
+                        correct: 2
+                    },
+                    {
+                        question: "Em que ano o homem chegou à Lua?",
+                        options: ["1967", "1969", "1971", "1973"],
+                        correct: 1
+                    },
+                    {
+                        question: "Qual é o maior planeta do sistema solar?",
+                        options: ["Saturno", "Júpiter", "Netuno", "Urano"],
+                        correct: 1
+                    },
+                    {
+                        question: "Quem escreveu 'Dom Quixote'?",
+                        options: ["García Lorca", "Miguel de Cervantes", "Lope de Vega", "Calderón de la Barca"],
+                        correct: 1
+                    }
+                ]
             }
-        ];
+        };
 
+        let currentLanguage = 'es';
         let currentQuestion = 0;
         let score = 0;
         let selectedAnswer = null;
 
+        // Función para obtener texto traducido con interpolación
+        function t(key, params = {}) {
+            let text = translations[currentLanguage][key] || key;
+            Object.keys(params).forEach(param => {
+                text = text.replace(`{${param}}`, params[param]);
+            });
+            return text;
+        }
+
+        // Función para cambiar idioma
+        function changeLanguage() {
+            const newLanguage = document.getElementById('language-select').value;
+            currentLanguage = newLanguage;
+            updateLanguage();
+            
+            // Reiniciar el juego con el nuevo idioma
+            restartGame();
+        }
+
+        // Función para actualizar todos los textos de la interfaz
+        function updateLanguage() {
+            document.getElementById('game-title').textContent = t('title');
+            document.getElementById('language-label').textContent = t('selectLanguage');
+            document.getElementById('next-btn').textContent = t('nextButton');
+            document.getElementById('play-again-btn').textContent = t('playAgain');
+        }
+
         function loadQuestion() {
-            const question = questions[currentQuestion];
+            const question = translations[currentLanguage].questions[currentQuestion];
             
             // Actualizar número de pregunta
-            document.getElementById('question-number').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('question-number').textContent = t('questionOf', {
+                current: currentQuestion + 1,
+                total: translations[currentLanguage].questions.length
+            });
             
             // Actualizar barra de progreso
-            const progress = ((currentQuestion) / questions.length) * 100;
+            const progress = ((currentQuestion) / translations[currentLanguage].questions.length) * 100;
             document.getElementById('progress').style.width = progress + '%';
             
             // Mostrar pregunta
@@ -284,7 +437,7 @@
         function nextQuestion() {
             if (selectedAnswer === null) return;
             
-            const question = questions[currentQuestion];
+            const question = translations[currentLanguage].questions[currentQuestion];
             const options = document.querySelectorAll('.option');
             
             // Mostrar respuesta correcta e incorrecta
@@ -306,7 +459,7 @@
             setTimeout(() => {
                 currentQuestion++;
                 
-                if (currentQuestion < questions.length) {
+                if (currentQuestion < translations[currentLanguage].questions.length) {
                     loadQuestion();
                 } else {
                     showResults();
@@ -328,20 +481,24 @@
             document.getElementById('progress').style.width = '100%';
             
             // Mostrar puntuación
-            const percentage = (score / questions.length) * 100;
-            document.getElementById('final-score').textContent = 
-                `Puntuación: ${score} de ${questions.length} (${percentage.toFixed(0)}%)`;
+            const totalQuestions = translations[currentLanguage].questions.length;
+            const percentage = (score / totalQuestions) * 100;
+            document.getElementById('final-score').textContent = t('score', {
+                score: score,
+                total: totalQuestions,
+                percentage: percentage.toFixed(0)
+            });
             
             // Mostrar feedback
             const feedbackElement = document.getElementById('feedback');
-            if (score === questions.length) {
-                feedbackElement.textContent = "¡Excelente! ¡Respuesta perfecta! 🏆";
+            if (score === totalQuestions) {
+                feedbackElement.textContent = t('excellent');
                 feedbackElement.className = "feedback excellent";
-            } else if (score >= questions.length * 0.7) {
-                feedbackElement.textContent = "¡Muy bien! Buen trabajo 👏";
+            } else if (score >= totalQuestions * 0.7) {
+                feedbackElement.textContent = t('good');
                 feedbackElement.className = "feedback good";
             } else {
-                feedbackElement.textContent = "Puedes mejorar. ¡Inténtalo de nuevo! 💪";
+                feedbackElement.textContent = t('poor');
                 feedbackElement.className = "feedback poor";
             }
         }
@@ -360,6 +517,7 @@
         }
 
         // Inicializar juego
+        updateLanguage();
         loadQuestion();
     </script>
 </body>
